@@ -88,6 +88,24 @@ cloudflare_zone_id   = "your-cf-zone-id"
     ssh -i <path-to-private-key> ubuntu@<output_public_ip>
     ```
 
+## Automated Deployment (GitHub Actions)
+
+A "push button" deployment pipeline is available via GitHub Actions:
+
+1.  **Configure Secrets:** Add the following to your GitHub Repository Settings > Secrets and variables > Actions:
+    *   `MGC_API_KEY`
+    *   `MGC_KEY_PAIR_ID`
+    *   `MGC_KEY_PAIR_SECRET`
+    *   `CLOUDFLARE_API_TOKEN`
+    *   `CLOUDFLARE_ZONE_ID`
+
+2.  **Run Workflow:**
+    *   Go to the **Actions** tab.
+    *   Select **Deploy Valheim Server**.
+    *   Click **Run workflow**.
+
+This runs `terraform apply -auto-approve` using the remote backend.
+
 ## Post-Deployment & Maintenance
 
 The `scripts/init.sh` script runs automatically on the first boot. It performs the following sequence:
