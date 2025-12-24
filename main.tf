@@ -4,6 +4,10 @@ terraform {
       source  = "MagaluCloud/mgc"
       version = "0.41.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
   }
 
   backend "s3" {
@@ -24,5 +28,9 @@ terraform {
 provider "mgc" {
   region  = var.region
   api_key = var.api_key
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
 }
 

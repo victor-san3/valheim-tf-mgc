@@ -20,3 +20,14 @@ variable "region" {
   type        = string
   description = "Default region"
 }
+
+variable "cloudflare_api_token" {
+  type        = string
+  sensitive   = true
+  description = "Cloudflare API token with DNS edit permissions for sanchez.dev.br"
+}
+
+variable "cloudflare_zone_id" {
+  type        = string
+  description = "Cloudflare Zone ID for sanchez.dev.br"
+}

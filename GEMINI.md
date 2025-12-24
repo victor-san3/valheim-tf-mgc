@@ -5,10 +5,11 @@ This project uses Terraform to deploy a [Valheim](https://www.valheimgame.com/) 
 ## Project Overview
 
 The infrastructure consists of:
-*   **Provider:** `MagaluCloud/mgc`
+*   **Provider:** `MagaluCloud/mgc` & `cloudflare/cloudflare`
 *   **Compute:** A virtual machine instance (`BV2-2-10` flavor) running Ubuntu 24.04 LTS.
 *   **Networking:**
     *   Public IPv4 address.
+    *   **DNS:** Automated `A` record update for `valheim.sanchez.dev.br` via Cloudflare.
     *   Security Group rules allowing:
         *   **SSH (22/tcp):** Remote management.
         *   **HTTP (80/tcp):** Status server (intended).
@@ -37,7 +38,8 @@ The infrastructure consists of:
 1.  **Terraform:** Installed on your local machine.
 2.  **Magalu Cloud Account:** With an active API Key.
 3.  **S3 Backend Config:** The `main.tf` is configured to use a remote backend.
-4.  **AWS CLI (Optional):** For manual bucket management.
+4.  **Cloudflare Account:** Zone ID and API Token with DNS edit permissions.
+5.  **AWS CLI (Optional):** For manual bucket management.
 
 ## Configuration
 
@@ -47,6 +49,8 @@ Key variables defined in `variables.tf`:
 *   `api_key`: Your Magalu Cloud API Key.
 *   `region`: The target deployment region (e.g., `br-se1`).
 *   `mgc_key_pair_id` / `mgc_key_pair_secret`: Credentials for object storage.
+*   `cloudflare_api_token`: Cloudflare API Token.
+*   `cloudflare_zone_id`: Cloudflare Zone ID.
 
 ### Secrets
 Create a `terraform.tfvars` file to set your secrets. **Do not commit this file.**
@@ -56,6 +60,8 @@ api_key             = "your-api-key"
 region              = "br-se1"
 mgc_key_pair_id     = "your-key-id"
 mgc_key_pair_secret = "your-key-secret"
+cloudflare_api_token = "your-cf-token"
+cloudflare_zone_id   = "your-cf-zone-id"
 ```
 
 ## Deployment

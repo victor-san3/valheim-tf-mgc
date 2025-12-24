@@ -1,0 +1,47 @@
+name: Deploy Valheim Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to MGC
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # MGC requires a credentials file for the S3 backend to work with the custom profile "mgc"
+      - name: Configure Backend Credentials
+        run: |
+          mkdir -p ~/.aws
+          
+          # Create credentials file with [mgc] profile
+          echo "[mgc]" > ~/.aws/credentials
+          echo "aws_access_key_id = ${{ secrets.MGC_KEY_PAIR_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key = ${{ secrets.MGC_KEY_PAIR_SECRET }}" >> ~/.aws/credentials
+          
+          # Create config file with [mgc] profile region
+          echo "[mgc]" > ~/.aws/config
+          echo "region = br-se1" >> ~/.aws/config
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_api_key: ${{ secrets.MGC_API_KEY }}
+          TF_VAR_region: "br-se1"
+          TF_VAR_mgc_key_pair_id: ${{ secrets.MGC_KEY_PAIR_ID }}
+          TF_VAR_mgc_key_pair_secret: ${{ secrets.MGC_KEY_PAIR_SECRET }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
