@@ -60,7 +60,7 @@ resource "mgc_ssh_keys" "valheim_key" {
 # Create VM with custom security groups and public IP
 resource "mgc_virtual_machine_instances" "valheim_server" {
   name                     = "valheim"
-  machine_type             = "BV2-2-10"
+  machine_type             = "BV2-8-10"
   image                    = "cloud-ubuntu-24.04 LTS"
   ssh_key_name             = mgc_ssh_keys.valheim_key.name
   creation_security_groups = [mgc_network_security_groups.valheim_sg.id]
