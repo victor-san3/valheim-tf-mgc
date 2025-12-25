@@ -1,0 +1,55 @@
+name: Undeploy Valheim Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  undeploy:
+    name: Undeploy from MGC
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # MGC requires a credentials file for the S3 backend to work with the custom profile "mgc"
+      - name: Configure Backend Credentials
+        run: |
+          mkdir -p ~/.aws
+          
+          # Create credentials file with [mgc] profile
+          echo "[mgc]" > ~/.aws/credentials
+          echo "aws_access_key_id = ${{ secrets.MGC_KEY_PAIR_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key = ${{ secrets.MGC_KEY_PAIR_SECRET }}" >> ~/.aws/credentials
+          
+          # Create config file with [mgc] profile region
+          echo "[mgc]" > ~/.aws/config
+          echo "region = br-se1" >> ~/.aws/config
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: .terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        env:
+          TF_VAR_api_key: ${{ secrets.MGC_API_KEY }}
+          TF_VAR_region: "br-se1"
+          TF_VAR_mgc_key_pair_id: ${{ secrets.MGC_KEY_PAIR_ID }}
+          TF_VAR_mgc_key_pair_secret: ${{ secrets.MGC_KEY_PAIR_SECRET }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
