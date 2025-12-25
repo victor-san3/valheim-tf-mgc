@@ -33,6 +33,14 @@ jobs:
           echo "[mgc]" > ~/.aws/config
           echo "region = br-se1" >> ~/.aws/config
 
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: .terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+
       - name: Terraform Init
         run: terraform init
 
