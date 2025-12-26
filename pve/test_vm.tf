@@ -6,13 +6,15 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
   initialization {
     user_account {
-      username = "user"
-      password = "password"
+      keys     = [trimspace(tls_private_key.ubuntu_vm_key.public_key_openssh)]
+      password = random_password.ubuntu_vm_password.result
+      username = "ubuntu"
     }
 
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "192.168.15.${random_integer.ip_offset.result}/24"
+        gateway = "192.168.15.1"
       }
     }
   }
@@ -38,18 +40,37 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
   keyboard_layout = "pt-br"
 
-  # Enable QEMU guest agent for cloud-init
   agent {
     enabled = true
   }
 
-  # Network interface - uses default vmbr0 bridge
   network_device {
     bridge = "vmbr0"
   }
 }
 
-# NOTE: The download_file resource has a bug with Proxmox API causing "proxy loop detected".
-# Workaround: Manually download the image on pve1:
-#   wget -O /var/lib/vz/template/cache/noble-server-cloudimg-amd64.img \
-#     https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+resource "random_password" "ubuntu_vm_password" {
+  length           = 16
+  override_special = "_%@"
+  special          = true
+}
+
+resource "random_integer" "ip_offset" {
+  min = 60
+  max = 90
+}
+
+resource "tls_private_key" "ubuntu_vm_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+output "ubuntu_vm_key" {
+  value     = tls_private_key.ubuntu_vm_key.private_key_openssh
+  sensitive = true
+}
+
+output "ubuntu_vm_password" {
+  value     = random_password.ubuntu_vm_password.result
+  sensitive = true
+}
