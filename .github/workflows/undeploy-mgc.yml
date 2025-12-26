@@ -1,16 +1,17 @@
-name: Deploy Valheim Server
+name: Undeploy Valheim Server (MGC)
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to MGC
+  undeploy:
+    name: Undeploy from MGC
     runs-on: ubuntu-latest
     
     defaults:
       run:
         shell: bash
+        working-directory: mgc
 
     steps:
       - name: Checkout Code
@@ -36,16 +37,16 @@ jobs:
       - name: Cache Terraform
         uses: actions/cache@v4
         with:
-          path: .terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          path: mgc/.terraform
+          key: ${{ runner.os }}-terraform-mgc-${{ hashFiles('mgc/.terraform.lock.hcl') }}
           restore-keys: |
-            ${{ runner.os }}-terraform-
+            ${{ runner.os }}-terraform-mgc-
 
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
         env:
           TF_VAR_api_key: ${{ secrets.MGC_API_KEY }}
           TF_VAR_region: "br-se1"

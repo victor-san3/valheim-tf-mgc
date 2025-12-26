@@ -12,7 +12,7 @@ terraform {
 
   backend "s3" {
     bucket                      = "terraform-tf-state"
-    key                         = "terraform.tfstate"
+    key                         = "mgc/terraform.tfstate"
     region                      = "br-se1"
     profile                     = "mgc"
     skip_region_validation      = true
