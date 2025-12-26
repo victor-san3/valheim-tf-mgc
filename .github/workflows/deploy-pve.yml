@@ -1,0 +1,7 @@
+name: Deploy Valheim Server (PVE)
+
+on:
+  workflow_dispatch:
+
+# Placeholder - Implementation coming soon
+# This workflow will deploy to Proxmox VE homelab
