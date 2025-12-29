@@ -18,6 +18,11 @@ terraform {
       source  = "hashicorp/random"
       version = "3.7.2"
     }
+
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.2"
+    }
   }
 
   backend "s3" {
@@ -52,7 +57,7 @@ provider "proxmox" {
   random_vm_id_end   = 300
 
   ssh {
-    agent = true
+    password = var.proxmox_password
 
     node {
       name    = "pve1"
