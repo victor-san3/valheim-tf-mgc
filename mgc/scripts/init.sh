@@ -42,10 +42,26 @@ Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc" | tee /etc/apt/sources.list.d/docker.sources
 
 # 5. Install Docker components, unzip and btop
-wait_for_apt
-apt-get update
-wait_for_apt
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin unzip btop
+# Retry loop to handle transient 404 errors from Docker's CDN
+DOCKER_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+MAX_RETRIES=3
+for i in $(seq 1 $MAX_RETRIES); do
+  wait_for_apt
+  apt-get update --fix-missing
+  wait_for_apt
+  if apt-get install -y $DOCKER_PACKAGES unzip btop; then
+    echo "Docker installation succeeded on attempt $i"
+    break
+  else
+    echo "Docker installation failed on attempt $i of $MAX_RETRIES"
+    if [ $i -eq $MAX_RETRIES ]; then
+      echo "Max retries reached. Exiting."
+      exit 1
+    fi
+    echo "Waiting 30 seconds before retry..."
+    sleep 30
+  fi
+done
 
 # 6. Post-install steps
 groupadd docker || true
