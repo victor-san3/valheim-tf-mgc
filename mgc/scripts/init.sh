@@ -25,67 +25,39 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 wait_for_apt
 apt-get remove -y docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc || true
 
-# 3. Add Docker's official GPG key
+# 3. Install Docker using the official convenience script
+# https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
+curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+sh /tmp/get-docker.sh
+rm /tmp/get-docker.sh
+
+# 4. Install additional utilities
 wait_for_apt
-apt-get update
-apt-get install -y ca-certificates curl
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
+apt-get install -y unzip btop
 
-# 4. Add the repository to Apt sources
-# Using $${} in Terraform templates prevents the variable from being treated as a Terraform variable
-echo "Types: deb
-URIs: https://download.docker.com/linux/ubuntu
-Suites: $(. /etc/os-release && echo "$${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-Components: stable
-Signed-By: /etc/apt/keyrings/docker.asc" | tee /etc/apt/sources.list.d/docker.sources
-
-# 5. Install Docker components, unzip and btop
-# Retry loop to handle transient 404 errors from Docker's CDN
-DOCKER_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
-MAX_RETRIES=3
-for i in $(seq 1 $MAX_RETRIES); do
-  wait_for_apt
-  apt-get update --fix-missing
-  wait_for_apt
-  if apt-get install -y $DOCKER_PACKAGES unzip btop; then
-    echo "Docker installation succeeded on attempt $i"
-    break
-  else
-    echo "Docker installation failed on attempt $i of $MAX_RETRIES"
-    if [ $i -eq $MAX_RETRIES ]; then
-      echo "Max retries reached. Exiting."
-      exit 1
-    fi
-    echo "Waiting 30 seconds before retry..."
-    sleep 30
-  fi
-done
-
-# 6. Post-install steps
+# 5. Post-install steps
 groupadd docker || true
 usermod -aG docker ubuntu
 
 # Run test as docker group without switching shells
 sudo -u ubuntu sg docker -c "docker run hello-world"
 
-# 7. Install aws cli
+# 6. Install aws cli
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/home/ubuntu/awscliv2.zip"
 unzip /home/ubuntu/awscliv2.zip -d /home/ubuntu
 sudo /home/ubuntu/aws/install
 rm -rf /home/ubuntu/aws /home/ubuntu/awscliv2.zip
 
-# 8. Configure AWS CLI
+# 6. Configure AWS CLI
 sudo -u ubuntu aws configure set aws_access_key_id "${mgc_key_pair_id}"
 sudo -u ubuntu aws configure set aws_secret_access_key "${mgc_key_pair_secret}"
 sudo -u ubuntu aws configure set default.region "${region}"
 
-# 9. Download Valheim Server Directory
+# 7. Download Valheim Server Directory
 sudo -u ubuntu mkdir -p /home/ubuntu/valheim-server/
 sudo -u ubuntu aws s3 sync s3://bird-weak-gray/valheim-server/ /home/ubuntu/valheim-server/ --endpoint-url https://br-se1.magaluobjects.com
 
-# 10. Configure Systemd One-Shot Service for First Boot Start
+# 8. Configure Systemd One-Shot Service for First Boot Start
 # This ensures Docker starts the container AFTER the system reboot, preventing corruption.
 cat <<EOF > /etc/systemd/system/valheim-init.service
 [Unit]
@@ -108,13 +80,13 @@ EOF
 # Enable the service so it runs on reboot
 systemctl enable valheim-init.service
 
-# 11. Configure Backup Cron Job
+# 9. Configure Backup Cron Job
 chmod +x /home/ubuntu/valheim-server/cron/backup_magalu.sh
 echo "0 */4 * * * /home/ubuntu/valheim-server/cron/backup_magalu.sh" >> /var/spool/cron/crontabs/ubuntu
 chown ubuntu:crontab /var/spool/cron/crontabs/ubuntu
 chmod 600 /var/spool/cron/crontabs/ubuntu
 
-# 12. Final System Update & Cleanup
+# 10. Final System Update & Cleanup
 echo "Performing final update and cleanup..."
 wait_for_apt
 apt-get update
