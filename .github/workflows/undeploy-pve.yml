@@ -1,7 +1,0 @@
-name: Undeploy Valheim Server (PVE)
-
-on:
-  workflow_dispatch:
-
-# Placeholder - Implementation coming soon
-# This workflow will destroy resources on Proxmox VE homelab
