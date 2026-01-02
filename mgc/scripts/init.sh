@@ -43,7 +43,7 @@ apt-get update
 CONTAINERD_VERSION="2.2.0-2~ubuntu.24.04~noble"
 wait_for_apt
 apt-get install -y \
-  containerd.io=${CONTAINERD_VERSION} \
+  containerd.io=$${CONTAINERD_VERSION} \
   docker-ce \
   docker-ce-cli \
   docker-buildx-plugin \
