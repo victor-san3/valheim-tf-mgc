@@ -52,5 +52,6 @@ jobs:
           TF_VAR_region: "br-se1"
           TF_VAR_mgc_key_pair_id: ${{ secrets.MGC_KEY_PAIR_ID }}
           TF_VAR_mgc_key_pair_secret: ${{ secrets.MGC_KEY_PAIR_SECRET }}
+          TF_VAR_public_ssh_key: ${{ secrets.PUBLIC_SSH_KEY }}
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
