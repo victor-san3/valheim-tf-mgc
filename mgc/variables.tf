@@ -7,18 +7,24 @@ variable "api_key" {
 variable "mgc_key_pair_id" {
   type        = string
   sensitive   = true
-  description = "The Magalu Cloud key pair id"
+  description = "The Magalu Cloud key pair id for bucket access"
 }
 
 variable "mgc_key_pair_secret" {
   type        = string
   sensitive   = true
-  description = "The Magalu Cloud key pair secret"
+  description = "The Magalu Cloud key pair secret for bucket access"
 }
 
 variable "region" {
   type        = string
   description = "Default region"
+  default = "br-se1"
+}
+
+variable "public_ssh_key" {
+  type        = string
+  description = "Public SSH key for the instance"
 }
 
 variable "cloudflare_api_token" {

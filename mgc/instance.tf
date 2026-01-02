@@ -54,13 +54,13 @@ resource "mgc_network_security_groups_rules" "game_access_rule" {
 # Creat SSH key
 resource "mgc_ssh_keys" "valheim_key" {
   name = "valheim-key"
-  key  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGKo3gtP4MPg5jcqZtZbtfl7w7i/wiwrzqbzeMv14ebj mgc_terrafor_valheim_key"
+  key  = var.public_ssh_key
 }
 
 # Create VM with custom security groups and public IP
 resource "mgc_virtual_machine_instances" "valheim_server" {
   name                     = "valheim"
-  machine_type             = "BV2-8-10"
+  machine_type             = "BV1-2-10"
   image                    = "cloud-ubuntu-24.04 LTS"
   ssh_key_name             = mgc_ssh_keys.valheim_key.name
   creation_security_groups = [mgc_network_security_groups.valheim_sg.id]
