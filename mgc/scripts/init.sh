@@ -25,15 +25,31 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 wait_for_apt
 apt-get remove -y docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc || true
 
-# 3. Install Docker using the official convenience script
-# https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
-curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
-sh /tmp/get-docker.sh
-rm /tmp/get-docker.sh
-
-# 4. Install additional utilities
+# 3. Set up Docker apt repository
+# https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 wait_for_apt
-apt-get install -y unzip btop
+apt-get install -y ca-certificates curl
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable" > /etc/apt/sources.list.d/docker.list
+
+wait_for_apt
+apt-get update
+
+# 4. Install Docker with pinned containerd.io version
+# Pinning to 2.2.0-2 to work around Docker's broken package index (2.2.1 advertised but not on CDN)
+CONTAINERD_VERSION="2.2.0-2~ubuntu.24.04~noble"
+wait_for_apt
+apt-get install -y \
+  containerd.io=${CONTAINERD_VERSION} \
+  docker-ce \
+  docker-ce-cli \
+  docker-buildx-plugin \
+  docker-compose-plugin \
+  unzip \
+  btop
 
 # 5. Post-install steps
 groupadd docker || true
