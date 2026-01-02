@@ -55,6 +55,9 @@ apt-get install -y \
 groupadd docker || true
 usermod -aG docker ubuntu
 
+# Hold containerd.io to prevent upgrade to broken 2.2.1 version
+apt-mark hold containerd.io
+
 # Run test as docker group without switching shells
 sudo -u ubuntu sg docker -c "docker run hello-world"
 
