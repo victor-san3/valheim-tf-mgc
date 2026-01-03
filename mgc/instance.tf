@@ -51,18 +51,6 @@ resource "mgc_network_security_groups_rules" "game_access_rule" {
   security_group_id = mgc_network_security_groups.valheim_sg.id
 }
 
-# Netdata monitoring dashboard rule
-resource "mgc_network_security_groups_rules" "netdata_rule" {
-  description       = "Allow HTTP access for Netdata monitoring dashboard"
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  port_range_min    = 19999
-  port_range_max    = 19999
-  protocol          = "tcp"
-  remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = mgc_network_security_groups.valheim_sg.id
-}
-
 # Create VM with custom security groups and public IP
 resource "mgc_virtual_machine_instances" "valheim_server" {
   name                     = "valheim"
