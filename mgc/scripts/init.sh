@@ -54,6 +54,7 @@ apt-get install -y \
 # 5. Post-install steps
 groupadd docker || true
 usermod -aG docker ubuntu
+timedatectl set-timezone America/Sao_Paulo
 
 # Hold containerd.io to prevent upgrade to broken 2.2.1 version
 apt-mark hold containerd.io
