@@ -63,12 +63,6 @@ resource "mgc_network_security_groups_rules" "netdata_rule" {
   security_group_id = mgc_network_security_groups.valheim_sg.id
 }
 
-# Creat SSH key
-resource "mgc_ssh_keys" "valheim_key" {
-  name = "valheim-key"
-  key  = var.public_ssh_key
-}
-
 # Create VM with custom security groups and public IP
 resource "mgc_virtual_machine_instances" "valheim_server" {
   name                     = "valheim"
@@ -82,7 +76,6 @@ resource "mgc_virtual_machine_instances" "valheim_server" {
     mgc_key_pair_secret = var.mgc_key_pair_secret
     region              = var.region
   }))
-
 }
 
 # Easy access to the public IP
