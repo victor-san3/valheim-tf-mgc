@@ -56,6 +56,22 @@ groupadd docker || true
 usermod -aG docker ubuntu
 timedatectl set-timezone America/Sao_Paulo
 
+# 6. Create 2GB swap file to prevent OOM kills
+echo "Creating swap file..."
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+# Lower swappiness to only use swap under pressure
+echo 'vm.swappiness=10' >> /etc/sysctl.conf
+sysctl -p
+
+# 7. Install Netdata for real-time monitoring
+echo "Installing Netdata..."
+curl https://get.netdata.cloud/kickstart.sh > /tmp/netdata-kickstart.sh
+bash /tmp/netdata-kickstart.sh --stable-channel --non-interactive
+
 # Hold containerd.io to prevent upgrade to broken 2.2.1 version
 apt-mark hold containerd.io
 
@@ -102,7 +118,7 @@ systemctl enable valheim-init.service
 
 # 9. Configure Backup Cron Job
 chmod +x /home/ubuntu/valheim-server/cron/backup_magalu.sh
-echo "0 */4 * * * /home/ubuntu/valheim-server/cron/backup_magalu.sh" >> /var/spool/cron/crontabs/ubuntu
+echo "15 */1 * * * /home/ubuntu/valheim-server/cron/backup_magalu.sh" >> /var/spool/cron/crontabs/ubuntu
 chown ubuntu:crontab /var/spool/cron/crontabs/ubuntu
 chmod 600 /var/spool/cron/crontabs/ubuntu
 
