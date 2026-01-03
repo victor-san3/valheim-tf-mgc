@@ -19,12 +19,7 @@ variable "mgc_key_pair_secret" {
 variable "region" {
   type        = string
   description = "Default region"
-  default = "br-se1"
-}
-
-variable "public_ssh_key" {
-  type        = string
-  description = "Public SSH key for the instance"
+  default     = "br-se1"
 }
 
 variable "cloudflare_api_token" {
