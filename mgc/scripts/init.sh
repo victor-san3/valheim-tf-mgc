@@ -21,7 +21,18 @@ apt-get update
 wait_for_apt
 apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
 
-# 2. Remove old Docker versions
+# 2. Create 512MB swap file for memory headroom
+echo "Creating swap file..."
+fallocate -l 512M /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+sysctl vm.swappiness=100
+echo 'vm.swappiness=100' >> /etc/sysctl.conf
+echo "Swap file created and enabled with swappiness=100."
+
+# 3. Remove old Docker versions
 wait_for_apt
 apt-get remove -y docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc || true
 
@@ -102,7 +113,7 @@ systemctl enable valheim-init.service
 
 # 9. Configure Backup Cron Job
 chmod +x /home/ubuntu/valheim-server/cron/backup_magalu.sh
-echo "15 */1 * * * /home/ubuntu/valheim-server/cron/backup_magalu.sh" >> /var/spool/cron/crontabs/ubuntu
+echo "0 4 * * * /home/ubuntu/valheim-server/cron/backup_magalu.sh" >> /var/spool/cron/crontabs/ubuntu
 chown ubuntu:crontab /var/spool/cron/crontabs/ubuntu
 chmod 600 /var/spool/cron/crontabs/ubuntu
 
